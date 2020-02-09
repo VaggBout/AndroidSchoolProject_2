@@ -8,8 +8,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.Network;
-import android.net.NetworkInfo;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -20,8 +19,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 IntentFilter intentFilter = new IntentFilter();
-                intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE" );
-                intentFilter.addAction("android.net.wifi.WIFI_STATE_CHANGED");
+                intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+                intentFilter.addAction(Context.WIFI_SERVICE);
                 registerReceiver(new ConnectionInfo(), intentFilter);
             } else {
                 Toast.makeText(this, "Required permissions: GPS", Toast.LENGTH_SHORT).show();
@@ -42,10 +41,9 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
             IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE" );
-            intentFilter.addAction("android.net.wifi.WIFI_STATE_CHANGED");
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+            intentFilter.addAction(Context.WIFI_SERVICE);
             registerReceiver(new ConnectionInfo(), intentFilter);
         }
-
     }
 }

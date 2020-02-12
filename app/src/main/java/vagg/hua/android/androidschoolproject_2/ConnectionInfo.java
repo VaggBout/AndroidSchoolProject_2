@@ -5,7 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.widget.Toast;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class ConnectionInfo extends BroadcastReceiver {
 
@@ -14,16 +15,26 @@ public class ConnectionInfo extends BroadcastReceiver {
         int state = checkOnline(context);
 
         if(state == 1) {
-            Toast.makeText(context, "Connected", Toast.LENGTH_SHORT).show();
+            // If connected to the Internet start service
             Intent serviceIntent = new Intent();
             serviceIntent.setClassName(context, LocationService.class.getName());
             context.startService(serviceIntent);
 
+            // Notify Activity for new connection mode
+            Intent connectionIntent = new Intent("ConnectionIntent");
+            connectionIntent.putExtra("status", 1);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(connectionIntent);
+
         } else {
-            Toast.makeText(context, "Disconnected", Toast.LENGTH_SHORT).show();
+            // If disconnected stop service
             Intent serviceIntent = new Intent();
             serviceIntent.setClassName(context, LocationService.class.getName());
             context.stopService(serviceIntent);
+
+            // Notify Activity for new connection mode
+            Intent connectionIntent = new Intent("ConnectionIntent");
+            connectionIntent.putExtra("status", 0);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(connectionIntent);
         }
     }
 

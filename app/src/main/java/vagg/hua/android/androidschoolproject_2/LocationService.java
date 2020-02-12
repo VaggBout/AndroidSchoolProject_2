@@ -16,22 +16,35 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class LocationService extends Service{
+
+    public static final String KEY_LON = "LON";
+    public static final String KEY_LAT = "LAT";
 
     private LocationManager locationManager;
     private LocationListener GPSLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            Toast.makeText(LocationService.this, location.getLongitude() + " " + location.getLatitude() + "", Toast.LENGTH_SHORT).show();
+
+            // Call content provider to save location
             ContentValues contentValues = new ContentValues();
-
-
-            contentValues.put(DbHelper.KEY_LON, location.getLongitude());
-            contentValues.put(DbHelper.KEY_LAT, location.getLatitude());
+            contentValues.put(KEY_LON, location.getLongitude());
+            contentValues.put(KEY_LAT, location.getLatitude());
             getContentResolver().insert(
-                    Uri.parse("content://vagg.hua.android.androidschoolproject_2/insertLonLat"),
+                    Uri.parse("content://vagg.hua.android.LocationProvider/insertLonLat"),
                     contentValues);
+
+            // Notify main Activity for current location
+            Intent intent = new Intent("LanLonIntent");
+            intent.putExtra("lat", location.getLatitude());
+            intent.putExtra("lon", location.getLongitude());
+
+            // To use LocalBroadcastManager add "implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0' " to build.gradle
+            // Chose LocalBroadcastManager for broadcasting sensitive information(Location) instead of global broadcast
+            // so there is no leaking of private data
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
         }
 
         @Override
@@ -84,7 +97,6 @@ public class LocationService extends Service{
     public void onDestroy() {
         locationManager.removeUpdates(GPSLocationListener);
         super.onDestroy();
-
     }
 
 }

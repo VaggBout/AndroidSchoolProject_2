@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">AndroidSchoolProject_2</string>
+    <string name="welcome">Welcome! This app will track your location!</string>
+    <string name="status">Connection status: Not available</string>
+    <string name="lon">Longitude: Not available</string>
+    <string name="lat">Latitude: Not available</string>
 </resources>

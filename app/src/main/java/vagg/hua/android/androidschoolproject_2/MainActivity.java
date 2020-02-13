@@ -13,6 +13,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,13 +27,7 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                 // Register broadcasters if permissions are granted
-                IntentFilter intentFilter = new IntentFilter();
-                intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-                intentFilter.addAction(Context.WIFI_SERVICE);
-                registerReceiver(connectionInfo, intentFilter);
-
-                LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("LanLonIntent"));
-                LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(connectionReceiver, new IntentFilter("ConnectionIntent"));
+                registerReceivers();
             } else {
                 Toast.makeText(this, "Required permissions: GPS", Toast.LENGTH_SHORT).show();
             }
@@ -53,13 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
             // If app has location permissions register broadcasters
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-            intentFilter.addAction(Context.WIFI_SERVICE);
-            registerReceiver(connectionInfo, intentFilter);
-
-            LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter("LanLonIntent"));
-            LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(connectionReceiver, new IntentFilter("ConnectionIntent"));
+            registerReceivers();
         }
     }
 
@@ -67,17 +56,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         try {
             this.unregisterReceiver(connectionInfo);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(LocationReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(connectionReceiver);
         }
         catch (final Exception exception) {
             // The receiver was not registered.
             // There is nothing to do in that case.
             // Everything is fine.
+            Log.d("Unregister error", "Receivers are not registered");
         }
         super.onDestroy();
     }
 
     // Broadcast receiver to get live updates on location from service
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver LocationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
@@ -116,4 +108,16 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    private void registerReceivers() {
+
+        // If app has location permissions register broadcasters
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        intentFilter.addAction(Context.WIFI_SERVICE);
+        registerReceiver(connectionInfo, intentFilter);
+
+        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(LocationReceiver, new IntentFilter("LanLonIntent"));
+        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(connectionReceiver, new IntentFilter("ConnectionIntent"));
+    }
 }
